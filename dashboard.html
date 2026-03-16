@@ -1,0 +1,2622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L15G7N2VCX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-L15G7N2VCX');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <script>(function(){if(localStorage.getItem('bw-theme')==='light'){document.documentElement.classList.add('light-early');document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('light');});}})();</script>
+    <title>BudgetWise - Dashboard</title>
+    <meta name="description" content="BudgetWise dashboard - manage your expenses, savings goals, and financial insights all in one place.">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#10b981">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdn.plaid.com https://js.stripe.com https://esm.sh https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://trkdlwukjyupvvcyzebf.supabase.co https://*.plaid.com https://*.stripe.com https://esm.sh https://cdn.jsdelivr.net https://open.er-api.com https://api.exchangerate-api.com https://www.google-analytics.com https://www.googletagmanager.com; frame-src 'self' https://js.stripe.com https://*.plaid.com;">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="BudgetWise - Smart Budget Tracker">
+    <meta property="og:description" content="Track expenses, set savings goals, and get AI-powered financial advice. Free for everyone.">
+    <meta property="og:image" content="icons/icon-512.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script>if(localStorage.getItem('bw-theme')==='light')document.documentElement.classList.add('light-early');</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    <script src="https://js.stripe.com/v3/" async></script>
+    <!-- Tesseract.js loaded on-demand when scan is used (saves memory) -->
+</head>
+<body>
+    <!-- Loading spinner -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="16" width="3" height="5" rx="0.5" fill="currentColor" opacity="0.5"/>
+                <rect x="7" y="12" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.65"/>
+                <rect x="12" y="8" width="3" height="13" rx="0.5" fill="currentColor" opacity="0.8"/>
+                <rect x="17" y="4" width="3" height="17" rx="0.5" fill="currentColor" opacity="0.95"/>
+                <path d="M3 14L19 3" stroke="currentColor" stroke-width="1.8"/>
+                <path d="M16 2.5L20 3L18.5 6.5" fill="currentColor" stroke="none"/>
+            </svg>
+            <span>BudgetWise</span>
+        </div>
+        <div class="mode-dropdown" id="modeDropdown">
+            <button class="mode-dropdown-btn" id="modeDropdownBtn">
+                <div class="mode-dropdown-selected">
+                    <svg class="mode-icon-personal" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <svg class="mode-icon-business" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M3 21h18M9 8h1m4 0h1M9 12h1m4 0h1M9 16h1m4 0h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/></svg>
+                    <svg class="mode-icon-family" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                    <span id="modeDropdownLabel">Personal</span>
+                </div>
+                <svg class="mode-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="mode-dropdown-menu" id="modeDropdownMenu">
+                <button class="mode-option active" data-mode="personal">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>Personal</span>
+                    <svg class="mode-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                </button>
+                <button class="mode-option" data-mode="business">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 8h1m4 0h1M9 12h1m4 0h1M9 16h1m4 0h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/></svg>
+                    <span>Business</span><span class="pro-mode-tag">PRO</span>
+                    <svg class="mode-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                </button>
+                <button class="mode-option" data-mode="family">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                    <span>Family</span><span class="pro-mode-tag">PRO</span>
+                    <svg class="mode-check" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                </button>
+            </div>
+        </div>
+        <ul class="sidebar-nav">
+            <li class="nav-item active" data-page="overview">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span class="nav-label" data-personal="Overview" data-business="Dashboard" data-family="Home">Overview</span>
+            </li>
+            <li class="nav-item" data-page="expenses">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H3v16h18V4zM3 10h18"/><path d="M7 15h4"/></svg>
+                <span class="nav-label" data-personal="Expenses" data-business="Transactions" data-family="Spending">Expenses</span>
+            </li>
+            <li class="nav-item nav-no-business" data-page="savings">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2m-16 0H3"/><path d="M9 7h6m-6 4h6m-6 4h4"/></svg>
+                <span class="nav-label" data-personal="Savings" data-family="Family Savings">Savings</span>
+            </li>
+            <li class="nav-item nav-no-family" data-page="currency">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                <span class="nav-label" data-personal="Currency" data-business="FX Rates">Currency</span>
+            </li>
+            <li class="nav-item" data-page="advice">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+                <span class="nav-label" data-personal="Advice" data-business="Insights" data-family="Tips">Advice</span>
+            </li>
+            <li class="nav-item nav-personal-only" data-page="shared">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                <span>Shared</span>
+            </li>
+            <!-- Business-only nav -->
+            <li class="nav-item nav-business-only" data-page="invoices" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8m2-8H8"/></svg>
+                <span>Invoices</span>
+            </li>
+            <li class="nav-item nav-business-only" data-page="clients" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                <span>Clients</span>
+            </li>
+            <li class="nav-item nav-business-only" data-page="pnl" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10m-6 10V4M6 20v-6"/></svg>
+                <span>Profit & Loss</span>
+            </li>
+            <li class="nav-item nav-business-only" data-page="tax" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7v4m8-4v4M6 15h4m4 0h4"/></svg>
+                <span>Tax</span>
+            </li>
+            <li class="nav-item nav-business-only" data-page="family-tracking" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                <span>Partners <span class="beta-badge">Beta</span></span>
+            </li>
+            <!-- Family-only nav -->
+            <li class="nav-item nav-family-only" data-page="members" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                <span>Our Family</span>
+            </li>
+            <li class="nav-item nav-family-only" data-page="allowances" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                <span>Pocket Money</span>
+            </li>
+            <li class="nav-item nav-family-only" data-page="chores" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                <span>Chores & Rewards</span>
+            </li>
+            <li class="nav-item nav-family-only" data-page="family-goals" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                <span>Family Goals</span>
+            </li>
+            <!-- Family tracking (replaces bank for family mode) -->
+            <li class="nav-item nav-family-only" data-page="family-tracking" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Spending Tracker <span class="beta-badge">Beta</span></span>
+            </li>
+            <!-- Bank connect (not for family) -->
+            <li class="nav-item nav-no-family" data-page="bank">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11m16-11v11M8 14v3m4-3v3m4-3v3"/></svg>
+                <span class="nav-label" data-personal="Bank" data-business="Banking">Bank <span class="beta-badge">Beta</span></span>
+            </li>
+            <li class="nav-item" data-page="help">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>How to Use</span>
+            </li>
+            <li class="nav-item" id="adminNavItem" style="display:none;">
+                <a href="admin.html" style="display:flex;align-items:center;gap:0.75rem;color:inherit;text-decoration:none;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    <span>Admin</span>
+                </a>
+            </li>
+            <li class="nav-item" data-page="account">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span class="nav-label" data-personal="Account" data-business="Settings" data-family="Account">Account</span>
+            </li>
+            <li class="nav-install hidden" id="installBtn">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m4-5l5 5 5-5m-5 5V3"/></svg>
+                <span>Install App</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="theme-toggle" id="themeToggleDesktop">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            </button>
+            <div class="user-info" id="userInfo">
+                <div class="user-avatar" id="userAvatar"></div>
+                <span id="userName">User</span>
+                <span class="pro-badge hidden" id="proBadge">PRO</span>
+            </div>
+            <button class="btn-logout" id="logoutBtn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4m7 14l5-5-5-5m5 5H9"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Mobile header -->
+    <div class="mobile-header">
+        <button class="menu-toggle" id="menuToggle">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <span class="mobile-brand">BudgetWise</span>
+        <button class="theme-toggle" id="themeToggleMobile">
+            <svg class="icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Setup Modal (first time) -->
+        <div class="modal-overlay hidden" id="setupModal">
+            <div class="modal">
+                <h2>Welcome to BudgetWise</h2>
+                <p>Let's set up your budget. You can change these anytime.</p>
+                <div class="field">
+                    <label>Quick Start — pick your situation to pre-fill income &amp; savings</label>
+                    <p style="margin:-4px 0 8px;font-size:0.75rem;color:rgba(255,255,255,0.4);">Optional — you can type your own numbers below instead</p>
+                    <div class="template-grid" id="templateGrid">
+                        <div class="template-card" data-template="student">
+                            <div class="template-card-icon">&#127891;</div>
+                            <div class="template-card-name">Student</div>
+                            <div class="template-card-desc">R5,000 income · R500 savings</div>
+                        </div>
+                        <div class="template-card" data-template="professional">
+                            <div class="template-card-icon">&#128188;</div>
+                            <div class="template-card-name">Professional</div>
+                            <div class="template-card-desc">R25,000 income · R5,000 savings</div>
+                        </div>
+                        <div class="template-card" data-template="household">
+                            <div class="template-card-icon">&#127968;</div>
+                            <div class="template-card-name">Household</div>
+                            <div class="template-card-desc">R40,000 income · R8,000 savings</div>
+                        </div>
+                    </div>
+                </div>
+                <form id="setupForm">
+                    <div class="field">
+                        <label>Your Currency</label>
+                        <select id="setupCurrency" required>
+                            <option value="ZAR">ZAR - South African Rand</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="NGN">NGN - Nigerian Naira</option>
+                            <option value="KES">KES - Kenyan Shilling</option>
+                            <option value="GHS">GHS - Ghanaian Cedi</option>
+                            <option value="INR">INR - Indian Rupee</option>
+                            <option value="BRL">BRL - Brazilian Real</option>
+                            <option value="JPY">JPY - Japanese Yen</option>
+                            <option value="AUD">AUD - Australian Dollar</option>
+                            <option value="CAD">CAD - Canadian Dollar</option>
+                            <option value="CNY">CNY - Chinese Yuan</option>
+                            <option value="BWP">BWP - Botswana Pula</option>
+                            <option value="MZN">MZN - Mozambican Metical</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Monthly Income (after tax)</label>
+                        <input type="number" id="setupIncome" required placeholder="e.g. 25000" min="0" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label>Monthly Savings Goal</label>
+                        <input type="number" id="setupGoal" required placeholder="e.g. 5000" min="0" step="0.01">
+                    </div>
+                    <button type="submit" class="btn-primary">Get Started</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Business Setup Modal -->
+        <div class="modal-overlay hidden" id="businessSetupModal">
+            <div class="modal business-setup-modal">
+                <div class="business-setup-icon">
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M3 21h18M9 8h1m4 0h1M9 12h1m4 0h1M9 16h1m4 0h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/></svg>
+                </div>
+                <h2>Set Up Your Business Account</h2>
+                <p>Tell us about your business so we can tailor the experience.</p>
+                <form id="businessSetupForm">
+                    <div class="field">
+                        <label>Business Name</label>
+                        <input type="text" id="bizName" required placeholder="e.g. Acme Corp">
+                    </div>
+                    <div class="field">
+                        <label>Business Type</label>
+                        <select id="bizType" required>
+                            <option value="">Select type...</option>
+                            <option value="Retail">Retail</option>
+                            <option value="Tech">Tech / Software</option>
+                            <option value="Consulting">Consulting</option>
+                            <option value="Restaurant">Restaurant / Food</option>
+                            <option value="Freelance">Freelance</option>
+                            <option value="Agency">Agency</option>
+                            <option value="E-commerce">E-commerce</option>
+                            <option value="Construction">Construction</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Education">Education</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Currency</label>
+                        <select id="bizCurrency" required>
+                            <option value="ZAR">ZAR - South African Rand</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="NGN">NGN - Nigerian Naira</option>
+                            <option value="KES">KES - Kenyan Shilling</option>
+                            <option value="GHS">GHS - Ghanaian Cedi</option>
+                            <option value="INR">INR - Indian Rupee</option>
+                            <option value="BRL">BRL - Brazilian Real</option>
+                            <option value="JPY">JPY - Japanese Yen</option>
+                            <option value="AUD">AUD - Australian Dollar</option>
+                            <option value="CAD">CAD - Canadian Dollar</option>
+                            <option value="CNY">CNY - Chinese Yuan</option>
+                            <option value="BWP">BWP - Botswana Pula</option>
+                            <option value="MZN">MZN - Mozambican Metical</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Monthly Revenue</label>
+                        <input type="number" id="bizIncome" required placeholder="e.g. 50000" min="0" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label>Monthly Budget Target</label>
+                        <input type="number" id="bizGoal" required placeholder="e.g. 10000" min="0" step="0.01">
+                    </div>
+                    <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">Create Business Account</button>
+                </form>
+                <button class="biz-cancel-btn" id="bizCancelBtn">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Mode Switch Transition -->
+        <div class="mode-transition" id="modeTransition">
+            <div class="mode-transition-content">
+                <div class="mode-transition-icon" id="modeTransitionIcon"></div>
+                <div class="mode-transition-label" id="modeTransitionLabel"></div>
+            </div>
+        </div>
+
+        <!-- Add Expense Modal -->
+        <div class="modal-overlay hidden" id="expenseModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Add Expense</h2>
+                    <button class="modal-close" id="closeExpenseModal">&times;</button>
+                </div>
+                <form id="expenseForm">
+                    <div class="field">
+                        <label>Category</label>
+                        <select id="expCategory" required>
+                            <option value="">Select...</option>
+                            <option value="Housing">Housing / Rent</option>
+                            <option value="Food">Food & Groceries</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Utilities">Utilities (Electric, Water, WiFi)</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Health">Health & Medical</option>
+                            <option value="Education">Education</option>
+                            <option value="Subscriptions">Subscriptions</option>
+                            <option value="Personal">Personal Care</option>
+                            <option value="Savings">Savings / Investment</option>
+                            <option value="Tithe">Tithe (10%)</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Description</label>
+                        <input type="text" id="expDescription" required placeholder="e.g. Monthly rent">
+                    </div>
+                    <div class="field">
+                        <label>Amount</label>
+                        <input type="number" id="expAmount" required placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label>Date</label>
+                        <input type="date" id="expDate" required>
+                    </div>
+                    <div class="field">
+                        <label>Recurring?</label>
+                        <select id="expRecurring">
+                            <option value="no">No - One time</option>
+                            <option value="monthly">Yes - Monthly</option>
+                            <option value="weekly">Yes - Weekly</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Add Expense</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PAGE: Overview -->
+        <section class="page active" id="page-overview">
+            <div class="welcome-banner" id="welcomeBanner">
+                <div class="welcome-left">
+                    <h2 id="welcomeMsg">Good morning</h2>
+                    <p id="welcomeSub">Here's your financial snapshot</p>
+                </div>
+                <div class="streak-badge hidden" id="streakBadge">
+                    <span class="streak-flame">&#128293;</span>
+                    <span class="streak-count" id="streakCount">0</span>
+                    <span class="streak-label">day streak</span>
+                </div>
+            </div>
+
+            <!-- Global Search Trigger -->
+            <button class="global-search-trigger" id="globalSearchTrigger">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                Search expenses, goals, categories...
+            </button>
+
+            <!-- Recurring Expense Suggestions -->
+            <div id="recurringSuggestions"></div>
+
+            <!-- Monthly Summary -->
+            <div class="monthly-summary hidden" id="monthlySummary">
+                <div class="summary-icon">&#128202;</div>
+                <p id="summaryText"></p>
+                <button class="summary-dismiss" id="dismissSummary">&times;</button>
+            </div>
+            <div class="page-header">
+                <div>
+                    <h1>Overview</h1>
+                    <p class="page-subtitle" id="overviewMonth"></p>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button class="btn-primary btn-scan" id="scanReceiptBtn" style="background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);gap:6px;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="16" x2="13" y2="16"/></svg>
+                        Scan
+                    </button>
+                    <button class="btn-add" id="addExpenseBtn">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                        Add Expense
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-green">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Monthly Income</span>
+                        <span class="stat-value" id="statIncome">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-red">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Spent</span>
+                        <span class="stat-value" id="statSpent">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-blue">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"/><path d="M9 7h6m-6 4h6m-6 4h4"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Balance</span>
+                        <span class="stat-value" id="statRemaining">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-purple">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Saved This Month</span>
+                        <span class="stat-value" id="statSaved">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Move Money Between Accounts -->
+            <button id="moveMoneyBtn" style="margin:-4px 0 10px;padding:8px 16px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.15);border-radius:10px;color:#10b981;font-size:0.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;width:auto;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                Transfer Money
+            </button>
+
+            <!-- Family Income Breakdown (shown in family mode with shared group) -->
+            <div id="familyIncomeBreakdown" style="margin:-8px 0 12px;padding:10px 16px;background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:10px;font-size:0.8rem;display:none;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;font-weight:600;color:var(--text-primary);">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                    Joint Income Breakdown
+                </div>
+                <div id="incomeBreakdownList"></div>
+            </div>
+
+            <!-- Quick Add Expense -->
+            <div class="quick-add-bar" id="quickAddBar">
+                <select id="quickCategory" class="quick-select"></select>
+                <input type="number" id="quickAmount" placeholder="Amount" min="0" step="0.01" class="quick-input">
+                <input type="text" id="quickDesc" placeholder="Description" class="quick-input quick-desc">
+                <button class="quick-add-btn" id="quickAddBtn">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14m-7-7h14"/></svg>
+                    Add
+                </button>
+            </div>
+
+            <!-- Month Comparison -->
+            <div class="month-comparison hidden" id="monthComparison">
+                <span class="comparison-icon" id="comparisonIcon"></span>
+                <span class="comparison-text" id="comparisonText"></span>
+            </div>
+
+            <!-- Budget Warnings -->
+            <div class="budget-warnings hidden" id="budgetWarnings"></div>
+
+            <!-- Charts Row -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Spending by Category</h3>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
+                        <div class="chart-empty" id="pieEmpty">
+                            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0110 10"/></svg>
+                            <p>No expenses this month</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Income vs Expenses</h3>
+                    <div class="chart-container">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Progress Ring -->
+            <div class="chart-card full-width" id="budgetRingCard">
+                <h3>Budget Usage</h3>
+                <div class="budget-ring-wrap">
+                    <div class="budget-ring">
+                        <svg viewBox="0 0 120 120" width="120" height="120">
+                            <circle class="budget-ring-bg" cx="60" cy="60" r="50"/>
+                            <circle class="budget-ring-fill" id="ringFill" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+                        </svg>
+                        <div class="budget-ring-text">
+                            <span class="budget-ring-pct" id="ringPct">0%</span>
+                            <span class="budget-ring-label">spent</span>
+                        </div>
+                    </div>
+                    <div class="budget-ring-details">
+                        <div class="ring-detail">
+                            <span class="ring-dot" style="background:#10b981"></span>
+                            <span class="ring-detail-label">Income</span>
+                            <span class="ring-detail-value" id="ringIncome">-</span>
+                        </div>
+                        <div class="ring-detail">
+                            <span class="ring-dot" style="background:#ef4444"></span>
+                            <span class="ring-detail-label">Spent</span>
+                            <span class="ring-detail-value" id="ringSpent">-</span>
+                        </div>
+                        <div class="ring-detail">
+                            <span class="ring-dot" style="background:#3b82f6"></span>
+                            <span class="ring-detail-label">Balance</span>
+                            <span class="ring-detail-value" id="ringRemaining">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings Progress -->
+            <div class="chart-card full-width">
+                <h3 id="savingsProgressTitle">Savings Goal Progress</h3>
+                <div class="savings-progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="savingsProgress"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span id="savedAmount">0</span>
+                        <span id="goalAmount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spending Trends -->
+            <div class="chart-card full-width">
+                <h3>Spending Trends (6 Months)</h3>
+                <div class="chart-container chart-wide">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="chart-card full-width">
+                <h3>Recent Expenses</h3>
+                <div class="table-wrap">
+                    <table class="expense-table" id="recentTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentBody">
+                        </tbody>
+                    </table>
+                    <div class="empty-state empty-state-action hidden" id="emptyRecent">
+                        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                        <p>No expenses yet</p>
+                        <button class="empty-action-btn" class="trigger-add-expense">Add Your First Expense</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Expenses -->
+        <section class="page" id="page-expenses">
+            <div class="page-header">
+                <div>
+                    <h1>Expenses</h1>
+                    <p class="page-subtitle">All your transactions</p>
+                </div>
+                <div class="header-actions">
+                    <select class="month-filter" id="monthFilter"></select>
+                    <button class="btn-export" id="budgetLimitsBtn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10m-6 10V4m12 16v-4"/></svg>
+                        Limits
+                    </button>
+                    <button class="btn-export" id="manageCatsBtn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+                        Categories
+                    </button>
+                    <button class="btn-add" id="addExpenseBtn2">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                        Add
+                    </button>
+                </div>
+            </div>
+            <div class="chart-card full-width">
+                <div class="expense-toolbar">
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <input type="text" id="expenseSearch" placeholder="Search expenses...">
+                    </div>
+                    <select class="category-filter" id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Health">Health</option>
+                        <option value="Education">Education</option>
+                        <option value="Subscriptions">Subscriptions</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Savings">Savings</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <button class="btn-export" id="exportCSV">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m4-5l5 5 5-5m-5 5V3"/></svg>
+                        Export CSV
+                    </button>
+                    <button class="btn-export" id="exportPDF">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        Export PDF
+                    </button>
+                </div>
+                <div class="table-wrap">
+                    <table class="expense-table" id="allExpensesTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Recurring</th>
+                                <th>Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="allExpensesBody">
+                        </tbody>
+                    </table>
+                    <div class="empty-state empty-state-action hidden" id="emptyAll">
+                        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m4-5l5 5 5-5m-5 5V3"/></svg>
+                        <p>No expenses for this period</p>
+                        <button class="empty-action-btn" class="trigger-add-expense">Add Expense</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Savings -->
+        <section class="page" id="page-savings">
+            <div class="page-header">
+                <div>
+                    <h1>Savings</h1>
+                    <p class="page-subtitle">Track your savings goals</p>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn-add" id="addSavingsEntryBtn">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                        Add Savings
+                    </button>
+                    <button class="btn-add" id="addGoalBtn" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.2);color:#8b5cf6;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                        New Goal
+                    </button>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-green">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Monthly Budget Goal</span>
+                        <span class="stat-value" id="savingsGoalVal">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-blue">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Saved This Month</span>
+                        <span class="stat-value" id="savedThisMonth">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-purple">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2m-9-3h.01M15 11h.01"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Goal Status</span>
+                        <span class="stat-value" id="goalStatus">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specific Savings Goals -->
+            <div class="chart-card full-width">
+                <h3>What You're Saving For</h3>
+                <div id="savingsGoalsList" class="savings-goals-list">
+                    <div class="empty-state empty-state-action" id="emptyGoals">
+                        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                        <p>No savings goals yet</p>
+                        <button class="empty-action-btn" class="trigger-add-goal">Create Your First Goal</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card full-width">
+                <h3>Savings Over Time</h3>
+                <div class="chart-container chart-wide">
+                    <canvas id="savingsLineChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card full-width">
+                <h3>Update Monthly Budget</h3>
+                <form id="updateGoalForm" class="inline-form">
+                    <div class="field">
+                        <label>New Monthly Goal</label>
+                        <input type="number" id="newGoal" placeholder="e.g. 5000" min="0" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label>New Monthly Income</label>
+                        <input type="number" id="newIncome" placeholder="e.g. 25000" min="0" step="0.01">
+                    </div>
+                    <button type="submit" class="btn-primary">Update</button>
+                    <button type="button" class="btn-danger" id="resetBudgetBtn">Reset</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Add Savings Goal Modal -->
+        <div class="modal-overlay hidden" id="goalModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>New Savings Goal</h2>
+                    <button class="modal-close" id="closeGoalModal">&times;</button>
+                </div>
+                <form id="goalForm">
+                    <div class="field">
+                        <label>What are you saving for?</label>
+                        <input type="text" id="goalName" required placeholder="e.g. New Laptop, Car, Holiday">
+                    </div>
+                    <div class="field">
+                        <label>How much does it cost?</label>
+                        <input type="number" id="goalTarget" required placeholder="e.g. 15000" min="0" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label>How much can you save per month?</label>
+                        <input type="number" id="goalMonthly" required placeholder="e.g. 2000" min="0" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label>Target date (optional)</label>
+                        <input type="date" id="goalDeadline">
+                    </div>
+                    <button type="submit" class="btn-primary">Create Goal</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add to Goal Modal -->
+        <div class="modal-overlay hidden" id="addToGoalModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Add Money to Goal</h2>
+                    <button class="modal-close" id="closeAddToGoalModal">&times;</button>
+                </div>
+                <form id="addToGoalForm">
+                    <input type="hidden" id="addToGoalId">
+                    <p id="addToGoalName" style="color:rgba(255,255,255,0.5);margin-bottom:20px;font-size:0.9rem;"></p>
+                    <div class="field">
+                        <label>Amount to add</label>
+                        <input type="number" id="addToGoalAmount" required placeholder="e.g. 500" min="0" step="0.01">
+                    </div>
+                    <button type="submit" class="btn-primary">Add Funds</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Drill-down Detail Modal -->
+        <div class="modal-overlay hidden" id="drillModal">
+            <div class="modal" style="max-width:520px;">
+                <div class="modal-header">
+                    <h2 id="drillTitle">Daily Breakdown</h2>
+                    <button class="modal-close" id="closeDrillModal">&times;</button>
+                </div>
+                <div id="drillContent"></div>
+            </div>
+        </div>
+
+        <!-- Custom Category Modal -->
+        <div class="modal-overlay hidden" id="categoryModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Manage Categories</h2>
+                    <button class="modal-close" id="closeCategoryModal">&times;</button>
+                </div>
+                <div id="customCatList" class="custom-cat-list"></div>
+                <form id="addCategoryForm" style="margin-top:16px;">
+                    <div class="field" style="display:flex;gap:10px;align-items:flex-end;">
+                        <div style="flex:1;">
+                            <label>New Category Name</label>
+                            <input type="text" id="newCatName" required placeholder="e.g. Gym, Pets, Gifts">
+                        </div>
+                        <div style="width:60px;">
+                            <label>Color</label>
+                            <input type="color" id="newCatColor" value="#10b981" style="width:100%;height:42px;border:none;border-radius:8px;cursor:pointer;background:none;">
+                        </div>
+                        <button type="submit" class="btn-primary" style="width:auto;padding:12px 20px;margin-top:0;">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- PAGE: Currency -->
+        <section class="page" id="page-currency">
+            <div class="page-header">
+                <div>
+                    <h1>Currency Converter</h1>
+                    <p class="page-subtitle">Compare exchange rates in real time</p>
+                </div>
+            </div>
+            <div class="chart-card full-width">
+                <div class="converter-grid">
+                    <div class="converter-side">
+                        <label>Amount</label>
+                        <input type="number" id="convertAmount" value="1000" min="0" step="0.01">
+                    </div>
+                    <div class="converter-side">
+                        <label>From</label>
+                        <select id="convertFrom"></select>
+                    </div>
+                    <div class="converter-arrow">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+                    </div>
+                    <div class="converter-side">
+                        <label>To</label>
+                        <select id="convertTo"></select>
+                    </div>
+                    <div class="converter-side">
+                        <label>Result</label>
+                        <div class="convert-result" id="convertResult">-</div>
+                    </div>
+                </div>
+                <p class="rate-info" id="rateInfo"></p>
+            </div>
+            <div class="chart-card full-width">
+                <h3>Your Currency vs Others</h3>
+                <p class="chart-subtitle" id="currencyCompareLabel">Based on 1 unit of your currency</p>
+                <div class="chart-container chart-wide">
+                    <canvas id="currencyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Advice -->
+        <section class="page" id="page-advice">
+            <div class="page-header">
+                <div>
+                    <h1>Smart Advice</h1>
+                    <p class="page-subtitle">Personalized tips based on your spending</p>
+                </div>
+            </div>
+            <!-- Salary Insight -->
+            <div class="chart-card full-width comfort-card">
+                <h3>Salary Insight</h3>
+                <p class="comfort-subtitle">Based on your spending habits, here's what you should be earning</p>
+                <div class="comfort-grid" id="comfortGrid">
+                    <div class="comfort-item">
+                        <span class="comfort-label">Monthly Expenses</span>
+                        <span class="comfort-value" id="comfortExpenses">-</span>
+                    </div>
+                    <div class="comfort-item">
+                        <span class="comfort-label">+ 20% Emergency Buffer</span>
+                        <span class="comfort-value" id="comfortBuffer">-</span>
+                    </div>
+                    <div class="comfort-item">
+                        <span class="comfort-label">+ 15% Savings</span>
+                        <span class="comfort-value" id="comfortSavings">-</span>
+                    </div>
+                    <div class="comfort-item comfort-total">
+                        <span class="comfort-label">Comfortable Monthly Income</span>
+                        <span class="comfort-value" id="comfortMonthly">-</span>
+                    </div>
+                    <div class="comfort-item comfort-total">
+                        <span class="comfort-label">Comfortable Yearly Income</span>
+                        <span class="comfort-value" id="comfortYearly">-</span>
+                    </div>
+                </div>
+                <p class="comfort-note" id="comfortNote"></p>
+            </div>
+
+            <div class="advice-grid" id="adviceGrid">
+            </div>
+
+            <!-- AI Spending Insights -->
+            <div class="chart-card full-width ai-insights-card">
+                <div class="ai-insights-header">
+                    <h3>AI Spending Insights</h3>
+                    <span class="ai-badge">Smart Analysis</span>
+                </div>
+                <div id="aiInsights" class="ai-insights-body">
+                    <p class="ai-placeholder">Add expenses to unlock AI-powered insights about your spending patterns.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Shared Budget -->
+        <section class="page" id="page-shared">
+            <div class="page-header">
+                <div>
+                    <h1>Shared Budget</h1>
+                    <p class="page-subtitle">Collaborate with family or teammates</p>
+                </div>
+                <button class="btn-primary btn-sm" id="createGroupBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    New Group
+                </button>
+            </div>
+
+            <div id="sharedGroups" class="shared-groups-grid">
+                <div class="empty-state" id="noGroups">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                    <p>No shared budgets yet. Create a group and invite members to start collaborating.</p>
+                </div>
+            </div>
+
+            <!-- Create Group Modal -->
+            <div class="modal-overlay hidden" id="createGroupModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2>Create Budget Group</h2>
+                        <button class="modal-close" id="closeGroupModal">&times;</button>
+                    </div>
+                    <form id="createGroupForm">
+                        <div class="field">
+                            <label>Group Name</label>
+                            <input type="text" id="groupName" required placeholder="e.g. Family Budget">
+                        </div>
+                        <div class="field">
+                            <label>Monthly Budget</label>
+                            <input type="number" id="groupBudget" required placeholder="5000" min="1" step="any">
+                        </div>
+                        <div class="field">
+                            <label>Invite Members (email, comma-separated)</label>
+                            <input type="email" id="groupMembers" placeholder="partner@email.com" multiple>
+                        </div>
+                        <button type="submit" class="btn-primary">Create Group</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Bank Connect -->
+        <section class="page" id="page-bank">
+            <div class="page-header">
+                <div>
+                    <h1>Bank Connect <span class="beta-tag">Beta</span></h1>
+                    <p class="page-subtitle">Link your bank for automatic expense tracking</p>
+                </div>
+                <button class="btn-primary btn-sm" id="connectBankBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    Add Account
+                </button>
+            </div>
+
+            <!-- Total Balance Banner -->
+            <div class="bank-balance-banner" id="bankBalanceBanner" style="display:none;">
+                <div class="balance-label">Total Balance</div>
+                <div class="balance-amount" id="totalBankBalance">-</div>
+                <div class="balance-sub" id="bankAccountCount">0 accounts linked</div>
+            </div>
+
+            <!-- Bank Cards Grid -->
+            <div class="bank-cards-grid" id="bankCardsGrid"></div>
+
+            <!-- Recent Imported Transactions -->
+            <div class="chart-card full-width" id="importedTransactionsCard" style="display:none;">
+                <h3>Recently Imported</h3>
+                <div id="importedTransactions"></div>
+            </div>
+
+            <!-- Region Selector Modal -->
+            <div class="modal-overlay hidden" id="regionModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2>Select Your Region</h2>
+                        <button class="modal-close" id="closeRegionModal">&times;</button>
+                    </div>
+                    <p style="color:rgba(255,255,255,0.4);margin-bottom:16px;font-size:0.85rem;">Choose your region or search for your bank.</p>
+                    <div class="bank-search-wrap" style="margin-bottom:16px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:0.3;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <input type="text" id="bankSearchInput" class="input" placeholder="Search for your bank..." style="padding-left:36px;width:100%;">
+                    </div>
+                    <p class="bank-search-result hidden" id="bankSearchResult" style="color:rgba(255,255,255,0.5);font-size:0.8rem;margin-bottom:12px;"></p>
+                    <div class="region-grid" id="regionGrid">
+                        <!-- Ready -->
+                        <button class="region-card region-ready" data-provider="plaid">
+                            <span class="region-status ready">Ready</span>
+                            <div class="region-flag">🇺🇸 🇬🇧 🇨🇦 🇪🇺</div>
+                            <strong>US, UK, Canada & Europe</strong>
+                            <span class="region-provider">Powered by Plaid</span>
+                            <span class="region-banks">12,000+ banks including Chase, HSBC, Barclays, TD</span>
+                        </button>
+                        <button class="region-card region-ready" data-provider="stitch">
+                            <span class="region-status ready">Ready</span>
+                            <div class="region-flag">🇿🇦</div>
+                            <strong>South Africa</strong>
+                            <span class="region-provider">Add Manually</span>
+                            <span class="region-banks">FNB, Capitec, Standard Bank, Absa, Nedbank</span>
+                        </button>
+                        <!-- Coming Soon -->
+                        <button class="region-card region-soon" data-provider="mono">
+                            <span class="region-status soon">Coming Soon</span>
+                            <div class="region-flag">🇳🇬 🇬🇭 🇰🇪</div>
+                            <strong>Nigeria, Ghana & Kenya</strong>
+                            <span class="region-provider">Powered by Mono</span>
+                            <span class="region-banks">GTBank, Access, Zenith, Ecobank, M-Pesa</span>
+                        </button>
+                        <button class="region-card region-soon" data-provider="belvo">
+                            <span class="region-status soon">Coming Soon</span>
+                            <div class="region-flag">🇧🇷 🇲🇽 🇨🇴</div>
+                            <strong>Brazil, Mexico & Colombia</strong>
+                            <span class="region-provider">Powered by Belvo</span>
+                            <span class="region-banks">Nubank, BBVA, Bancolombia, Itau</span>
+                        </button>
+                        <button class="region-card region-soon" data-provider="basiq">
+                            <span class="region-status soon">Coming Soon</span>
+                            <div class="region-flag">🇦🇺 🇳🇿</div>
+                            <strong>Australia & New Zealand</strong>
+                            <span class="region-provider">Powered by Basiq</span>
+                            <span class="region-banks">CommBank, ANZ, Westpac, ASB</span>
+                        </button>
+                        <button class="region-card region-soon" data-provider="setu">
+                            <span class="region-status soon">Coming Soon</span>
+                            <div class="region-flag">🇮🇳</div>
+                            <strong>India</strong>
+                            <span class="region-provider">Powered by Setu</span>
+                            <span class="region-banks">SBI, HDFC, ICICI, Axis, Kotak, PNB, UPI</span>
+                        </button>
+                        <button class="region-card region-soon" data-provider="lean">
+                            <span class="region-status soon">Coming Soon</span>
+                            <div class="region-flag">🇦🇪 🇸🇦 🇧🇭 🇴🇲 🇰🇼 🇶🇦</div>
+                            <strong>Middle East</strong>
+                            <span class="region-provider">Powered by Lean Technologies</span>
+                            <span class="region-banks">Emirates NBD, Al Rajhi, FAB, Mashreq, KFH</span>
+                        </button>
+                        <button class="region-card region-soon" data-provider="brankas">
+                            <span class="region-status soon">Coming Soon</span>
+                            <div class="region-flag">🇸🇬 🇵🇭 🇮🇩 🇹🇭 🇻🇳</div>
+                            <strong>Southeast Asia</strong>
+                            <span class="region-provider">Powered by Brankas</span>
+                            <span class="region-banks">DBS, BDO, BCA, GCash, GrabPay, OVO</span>
+                        </button>
+                        <button class="region-card region-ready" data-provider="saltedge">
+                            <span class="region-status ready">Manual Entry</span>
+                            <div class="region-flag">🇩🇪 🇫🇷 🇮🇹 🇪🇸 🇵🇱 🇨🇿</div>
+                            <strong>Europe (Extended)</strong>
+                            <span class="region-provider">Powered by Salt Edge</span>
+                            <span class="region-banks">Deutsche Bank, BNP Paribas, UniCredit, Santander, ING, 5000+ banks across 50 countries</span>
+                        </button>
+                        <button class="region-card region-soon" data-provider="moneytree">
+                            <span class="region-status soon">Coming Soon</span>
+                            <div class="region-flag">🇯🇵 🇰🇷 🇹🇼 🇭🇰</div>
+                            <strong>East Asia</strong>
+                            <span class="region-provider">Powered by Moneytree</span>
+                            <span class="region-banks">MUFG, Mizuho, SMBC, Shinhan, Cathay, HSBC HK</span>
+                        </button>
+                        <button class="region-card region-soon" data-provider="mono-ext">
+                            <span class="region-status soon">Coming Soon</span>
+                            <div class="region-flag">🇹🇿 🇺🇬 🇷🇼 🇪🇬 🇲🇦 🇨🇮</div>
+                            <strong>Rest of Africa</strong>
+                            <span class="region-provider">Powered by Mono</span>
+                            <span class="region-banks">M-Pesa, Equity Bank, CIB Egypt, Attijariwafa, Ecobank</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SA Bank Modal -->
+            <div class="modal-overlay hidden" id="saBankModal">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2>Add South African Bank</h2>
+                        <button class="modal-close" id="closeSABankModal">&times;</button>
+                    </div>
+                    <p style="color:rgba(255,255,255,0.4);margin-bottom:16px;font-size:0.85rem;">Select your bank, then enter your account details.</p>
+                    <div class="bank-search-wrap" style="margin-bottom:12px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:0.3;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <input type="text" id="saBankSearchInput" class="input" placeholder="Search SA banks..." style="padding-left:36px;width:100%;">
+                    </div>
+                    <div class="sa-bank-list" id="saBankList">
+                        <button class="sa-bank-btn" data-bank="FNB">
+                            <span class="sa-bank-logo" style="background:#009639;">F</span>
+                            <span class="sa-bank-name">FNB</span>
+                            <span class="sa-bank-full">First National Bank</span>
+                        </button>
+                        <button class="sa-bank-btn" data-bank="Capitec">
+                            <span class="sa-bank-logo" style="background:#0033a0;">C</span>
+                            <span class="sa-bank-name">Capitec</span>
+                            <span class="sa-bank-full">Capitec Bank</span>
+                        </button>
+                        <button class="sa-bank-btn" data-bank="Standard Bank">
+                            <span class="sa-bank-logo" style="background:#0038a8;">S</span>
+                            <span class="sa-bank-name">Standard Bank</span>
+                            <span class="sa-bank-full">The Standard Bank of SA</span>
+                        </button>
+                        <button class="sa-bank-btn" data-bank="Absa">
+                            <span class="sa-bank-logo" style="background:#af0028;">A</span>
+                            <span class="sa-bank-name">Absa</span>
+                            <span class="sa-bank-full">Absa Group Limited</span>
+                        </button>
+                        <button class="sa-bank-btn" data-bank="Nedbank">
+                            <span class="sa-bank-logo" style="background:#009946;">N</span>
+                            <span class="sa-bank-name">Nedbank</span>
+                            <span class="sa-bank-full">Nedbank Group</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="selectedSABank" value="">
+                    <form id="saBankForm" style="display:none;margin-top:20px;">
+                        <div class="form-group">
+                            <label>Account Name</label>
+                            <input type="text" id="saAccountName" placeholder="e.g. My Cheque Account" class="input">
+                        </div>
+                        <div class="form-group">
+                            <label>Account Type</label>
+                            <select id="saAccountType" class="input">
+                                <option value="cheque">Cheque / Current</option>
+                                <option value="savings">Savings</option>
+                                <option value="credit">Credit Card</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Current Balance (ZAR)</label>
+                            <input type="number" id="saBalance" step="0.01" placeholder="0.00" class="input">
+                        </div>
+                        <button type="submit" class="btn-primary" style="width:100%;margin-top:12px;">Add Account</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Empty State / How It Works -->
+            <div id="bankEmptyState" class="bank-connect-grid">
+                <div class="chart-card full-width bank-hero-card">
+                    <div class="bank-hero">
+                        <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.6"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11m16-11v11M8 14v3m4-3v3m4-3v3"/></svg>
+                        <h3>Connect Your Bank Account</h3>
+                        <p>Link your bank to automatically import transactions. We support banks across 5 regions worldwide.</p>
+                    </div>
+                    <div class="bank-providers-strip">
+                        <span>Plaid</span>
+                        <span>Stitch</span>
+                        <span>Mono</span>
+                        <span>Belvo</span>
+                        <span>Basiq</span>
+                        <span>Setu</span>
+                        <span>Lean</span>
+                        <span>Brankas</span>
+                        <span>Salt Edge</span>
+                        <span>Moneytree</span>
+                    </div>
+                </div>
+
+                <div class="chart-card full-width bank-info-card">
+                    <h3>How It Works</h3>
+                    <div class="bank-steps">
+                        <div class="bank-step">
+                            <div class="bank-step-num">1</div>
+                            <div>
+                                <strong>Choose Region</strong>
+                                <p>Select your region to connect with the right banking provider</p>
+                            </div>
+                        </div>
+                        <div class="bank-step">
+                            <div class="bank-step-num">2</div>
+                            <div>
+                                <strong>Link Your Bank</strong>
+                                <p>Securely log in to your bank through an encrypted portal</p>
+                            </div>
+                        </div>
+                        <div class="bank-step">
+                            <div class="bank-step-num">3</div>
+                            <div>
+                                <strong>Auto-Import</strong>
+                                <p>Transactions are categorized and added to your expenses automatically</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Invoices (Business Only) -->
+        <section class="page" id="page-invoices">
+            <div class="page-header">
+                <div>
+                    <h1>Invoices</h1>
+                    <p class="page-subtitle">Create and track client invoices</p>
+                </div>
+                <button class="btn-add" id="addInvoiceBtn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    New Invoice
+                </button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-green">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Invoiced</span>
+                        <span class="stat-value" id="invTotal">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-blue">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Pending</span>
+                        <span class="stat-value" id="invPending">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-purple">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Paid</span>
+                        <span class="stat-value" id="invPaid">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-red">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6m0-6l6 6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Overdue</span>
+                        <span class="stat-value" id="invOverdue">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card full-width">
+                <div class="table-wrap">
+                    <table class="expense-table" id="invoiceTable">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Client</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Due</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoiceBody"></tbody>
+                    </table>
+                    <div class="empty-state empty-state-action" id="emptyInvoices">
+                        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6m-4 5H8m8 4H8m2-8H8"/></svg>
+                        <p>No invoices yet</p>
+                        <button class="empty-action-btn" class="trigger-add-invoice">Create First Invoice</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Invoice Modal -->
+        <div class="modal-overlay hidden" id="invoiceModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>New Invoice</h2>
+                    <button class="modal-close" id="closeInvoiceModal">&times;</button>
+                </div>
+                <form id="invoiceForm">
+                    <div class="field">
+                        <label>Client</label>
+                        <select id="invClient" required>
+                            <option value="">Select client...</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Description</label>
+                        <input type="text" id="invDescription" required placeholder="e.g. Website redesign">
+                    </div>
+                    <div class="field">
+                        <label>Amount</label>
+                        <input type="number" id="invAmount" required placeholder="0.00" min="0" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label>Invoice Date</label>
+                        <input type="date" id="invDate" required>
+                    </div>
+                    <div class="field">
+                        <label>Due Date</label>
+                        <input type="date" id="invDueDate" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Create Invoice</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PAGE: Clients (Business Only) -->
+        <section class="page" id="page-clients">
+            <div class="page-header">
+                <div>
+                    <h1>Clients</h1>
+                    <p class="page-subtitle">Manage your customers and contacts</p>
+                </div>
+                <button class="btn-add" id="addClientBtn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    Add Client
+                </button>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-blue">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Clients</span>
+                        <span class="stat-value" id="clientCount">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-green">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Revenue</span>
+                        <span class="stat-value" id="clientRevenue">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="clients-grid" id="clientsGrid">
+                <div class="empty-state empty-state-action" id="emptyClients">
+                    <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                    <p>No clients yet</p>
+                    <button class="empty-action-btn" class="trigger-add-client">Add First Client</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Client Modal -->
+        <div class="modal-overlay hidden" id="clientModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Add Client</h2>
+                    <button class="modal-close" id="closeClientModal">&times;</button>
+                </div>
+                <form id="clientForm">
+                    <div class="field">
+                        <label>Client Name</label>
+                        <input type="text" id="clientName" required placeholder="e.g. Acme Corp">
+                    </div>
+                    <div class="field">
+                        <label>Email</label>
+                        <input type="email" id="clientEmail" placeholder="client@example.com">
+                    </div>
+                    <div class="field">
+                        <label>Phone</label>
+                        <input type="tel" id="clientPhone" placeholder="+27 82 123 4567">
+                    </div>
+                    <div class="field">
+                        <label>Company</label>
+                        <input type="text" id="clientCompany" placeholder="Company name (optional)">
+                    </div>
+                    <button type="submit" class="btn-primary">Add Client</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PAGE: Profit & Loss (Business Only) -->
+        <section class="page" id="page-pnl">
+            <div class="page-header">
+                <div>
+                    <h1>Profit & Loss</h1>
+                    <p class="page-subtitle">Revenue vs expenses breakdown</p>
+                </div>
+                <select class="month-filter" id="pnlMonthFilter"></select>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-green">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Revenue</span>
+                        <span class="stat-value" id="pnlRevenue">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-red">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Expenses</span>
+                        <span class="stat-value" id="pnlExpenses">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-blue">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Net Profit</span>
+                        <span class="stat-value" id="pnlProfit">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-purple">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Profit Margin</span>
+                        <span class="stat-value" id="pnlMargin">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Revenue vs Expenses</h3>
+                    <div class="chart-container">
+                        <canvas id="pnlBarChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Expense Breakdown</h3>
+                    <div class="chart-container">
+                        <canvas id="pnlPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card full-width">
+                <h3>Profit Trend (6 Months)</h3>
+                <div class="chart-container chart-wide">
+                    <canvas id="pnlTrendChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card full-width">
+                <h3>Expense Details</h3>
+                <div class="pnl-breakdown" id="pnlBreakdown"></div>
+            </div>
+        </section>
+
+        <!-- PAGE: Tax (Business Only) -->
+        <section class="page" id="page-tax">
+            <div class="page-header">
+                <div>
+                    <h1>Tax Summary</h1>
+                    <p class="page-subtitle">Estimated tax obligations</p>
+                </div>
+            </div>
+            <div class="chart-card full-width" style="border-left: 3px solid #f59e0b;">
+                <p style="color:rgba(255,255,255,0.5);font-size:0.85rem;line-height:1.6;">These are estimates only. Consult a tax professional for accurate filing. Tax rates shown are approximate and may vary based on your jurisdiction.</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon stat-green">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Annual Revenue</span>
+                        <span class="stat-value" id="taxRevenue">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-red">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Annual Expenses</span>
+                        <span class="stat-value" id="taxExpenses">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-blue">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Taxable Income</span>
+                        <span class="stat-value" id="taxableIncome">-</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon stat-purple">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 7v4m8-4v4M6 15h4m4 0h4"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Estimated Tax</span>
+                        <span class="stat-value" id="taxEstimate">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-card full-width">
+                <h3>Quarterly Breakdown</h3>
+                <div class="table-wrap">
+                    <table class="expense-table" id="taxTable">
+                        <thead>
+                            <tr>
+                                <th>Quarter</th>
+                                <th>Revenue</th>
+                                <th>Expenses</th>
+                                <th>Taxable</th>
+                                <th>Est. Tax</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taxBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="chart-card full-width">
+                <h3>Deductible Expenses</h3>
+                <p style="color:rgba(255,255,255,0.4);font-size:0.85rem;margin-bottom:16px;">Business expenses that can reduce your taxable income.</p>
+                <div class="pnl-breakdown" id="taxDeductibles"></div>
+            </div>
+        </section>
+
+        <!-- PAGE: Family Members -->
+        <section class="page" id="page-members">
+            <div class="page-header">
+                <div>
+                    <h1>Family Members</h1>
+                    <p class="page-subtitle">Manage your household</p>
+                </div>
+                <button class="btn-primary" id="addMemberBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    Add Member
+                </button>
+            </div>
+            <div class="members-grid" id="membersGrid">
+                <div class="empty-state" id="emptyMembers">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                    <p>No family members yet. Add your first member to get started.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Allowances -->
+        <section class="page" id="page-allowances">
+            <div class="page-header">
+                <div>
+                    <h1>Allowances</h1>
+                    <p class="page-subtitle">Track spending money for each member</p>
+                </div>
+            </div>
+            <!-- Financial Tip of the Day -->
+            <div class="tip-banner" id="familyTipBanner">
+                <span class="tip-banner-icon">&#128161;</span>
+                <span class="tip-banner-text" id="familyTipText">Loading tip...</span>
+                <button class="tip-dismiss" id="dismissTip">&times;</button>
+            </div>
+
+            <!-- Parent Allowance Warnings -->
+            <div id="allowanceWarnings"></div>
+
+            <div class="allowance-cards" id="allowanceCards">
+                <div class="empty-state" id="emptyAllowances">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    <p>Add family members first, then set up their allowances.</p>
+                </div>
+            </div>
+
+            <!-- Family Overview (spending comparison) -->
+            <div class="chart-card full-width family-overview-card" id="familyOverviewCard" style="margin-top:16px;">
+                <div class="family-overview-title">Who Spent What This Week</div>
+                <div id="familyOverviewBars"></div>
+            </div>
+
+            <!-- Savings Leaderboard -->
+            <div class="chart-card full-width" style="margin-top:12px;">
+                <h3 style="margin-bottom:12px;">Savings Leaderboard</h3>
+                <div class="leaderboard" id="savingsLeaderboard">
+                    <div class="empty-state" style="padding:16px;"><p>Add members to see the leaderboard</p></div>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button class="btn-primary" id="openWishListBtn" style="flex:1;padding:10px;font-size:0.82rem;background:rgba(245,158,11,0.15);color:#f59e0b;">&#127775; Wish List</button>
+                <button class="btn-primary" id="openFamilyReportBtn" style="flex:1;padding:10px;font-size:0.82rem;background:rgba(99,102,241,0.15);color:#6366f1;">&#128202; Monthly Report</button>
+            </div>
+        </section>
+
+        <!-- PAGE: Chores -->
+        <section class="page" id="page-chores">
+            <div class="page-header">
+                <div>
+                    <h1>Chores & Rewards</h1>
+                    <p class="page-subtitle">Assign tasks and earn rewards</p>
+                </div>
+                <button class="btn-primary" id="addChoreBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    Add Chore
+                </button>
+            </div>
+            <div class="chores-list" id="choresList">
+                <div class="empty-state" id="emptyChores">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                    <p>No chores assigned yet. Create chores with rewards to motivate the family.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Family Goals -->
+        <section class="page" id="page-family-goals">
+            <div class="page-header">
+                <div>
+                    <h1>Family Goals</h1>
+                    <p class="page-subtitle">Save together as a family</p>
+                </div>
+                <button class="btn-primary" id="addFamilyGoalBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+                    New Goal
+                </button>
+            </div>
+            <div class="family-goals-grid" id="familyGoalsGrid">
+                <div class="empty-state" id="emptyFamilyGoals">
+                    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                    <p>No family goals yet. Start saving together for something special!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Family Spending Tracker -->
+        <section class="page" id="page-family-tracking">
+            <div class="page-header">
+                <div>
+                    <h1>Spending Tracker</h1>
+                    <p class="page-subtitle">Track real spending from linked family members</p>
+                </div>
+            </div>
+
+            <!-- If parent: show invite code + linked members feed -->
+            <div id="trackingParentView">
+                <div class="chart-card full-width" style="margin-bottom:16px;">
+                    <h3 class="tracking-title" style="margin-bottom:12px;">Your Family Invite Code</h3>
+                    <p class="tracking-desc" style="font-size:0.82rem;margin-bottom:12px;">Share this code with family members. They enter it in their app to link their spending to your family dashboard.</p>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <div id="familyInviteCode" class="invite-code-box" style="font-size:1.8rem;font-weight:800;letter-spacing:6px;padding:12px 20px;border-radius:12px;min-width:0;">------</div>
+                        <div style="display:flex;gap:8px;flex-shrink:0;">
+                            <button class="btn-primary" id="generateCodeBtn" style="padding:12px 18px;white-space:nowrap;">Generate Code</button>
+                            <button class="btn-primary" id="copyCodeBtn" style="padding:12px 18px;background:rgba(255,255,255,0.06);white-space:nowrap;">Copy</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Family Income Summary -->
+                <div class="chart-card full-width" style="margin-bottom:16px;" id="familyIncomeSection">
+                    <h3 style="margin-bottom:8px;">Family Income</h3>
+                    <p class="tracking-desc" style="font-size:0.78rem;margin-bottom:12px;">Combined income from all family members. Each parent sets their own contribution.</p>
+                    <div id="familyIncomeSummary"></div>
+                </div>
+
+                <!-- Pending Approvals (for owner/parent) -->
+                <div class="chart-card full-width" style="margin-bottom:16px;display:none;" id="pendingApprovalsCard">
+                    <h3 style="margin-bottom:4px;">Pending Approvals</h3>
+                    <p class="tracking-desc" style="font-size:0.78rem;margin-bottom:14px;">Requests from kids waiting for your approval.</p>
+                    <div id="pendingApprovalsList"></div>
+                </div>
+
+                <!-- Linked members -->
+                <div class="chart-card full-width" style="margin-bottom:16px;">
+                    <h3 style="margin-bottom:4px;">Linked Members</h3>
+                    <p class="tracking-desc" style="font-size:0.78rem;margin-bottom:14px;">Family members linked to this group. Owner can manage roles and approve access.</p>
+                    <div id="linkedMembersList">
+                        <div class="empty-state" style="padding:20px;"><p>No members linked yet. Share your invite code to get started.</p></div>
+                    </div>
+                </div>
+
+                <!-- Real-time spending feed -->
+                <div class="chart-card full-width">
+                    <h3 style="margin-bottom:12px;">Family Spending Feed</h3>
+                    <div id="familySpendingFeed">
+                        <div class="empty-state" style="padding:20px;"><p>Spending from linked members will appear here.</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- If member: show join + sharing settings -->
+            <div id="trackingMemberView">
+                <div class="chart-card full-width" style="margin-bottom:16px;">
+                    <h3 class="tracking-title" style="margin-bottom:12px;">Join a Family</h3>
+                    <p class="tracking-desc" style="font-size:0.82rem;margin-bottom:12px;">Enter the invite code from your parent/guardian to link your spending.</p>
+                    <div id="joinSection">
+                        <div style="display:flex;gap:10px;max-width:100%;overflow:hidden;">
+                            <input type="text" id="joinCodeInput" placeholder="Enter invite code" maxlength="8" class="quick-input" style="flex:1;min-width:0;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;text-align:center;">
+                            <button class="btn-primary" id="joinFamilyBtn" style="padding:12px 24px;flex-shrink:0;">Join</button>
+                        </div>
+                        <p class="auth-error" id="joinError" style="min-height:0;"></p>
+                    </div>
+                    <div id="linkedStatus" style="display:none;">
+                        <div style="display:flex;align-items:center;gap:10px;padding:14px;background:rgba(16,185,129,0.08);border-radius:12px;margin-bottom:12px;">
+                            <span style="font-size:1.3rem;">&#9989;</span>
+                            <div>
+                                <div style="font-weight:700;">Linked to <span id="linkedFamilyName">Family</span></div>
+                                <div class="tracking-desc" style="font-size:0.78rem;" id="linkedStatusText">Waiting for approval...</div>
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="unlinkBtn" style="padding:10px;font-size:0.82rem;background:rgba(239,68,68,0.12);color:#ef4444;width:100%;">Unlink from Family</button>
+                    </div>
+                </div>
+
+                <!-- My Pending Requests (for kids) -->
+                <div class="chart-card full-width" style="margin-bottom:16px;">
+                    <h3 style="margin-bottom:4px;">My Requests</h3>
+                    <p class="tracking-desc" style="font-size:0.78rem;margin-bottom:14px;">Your submissions waiting for parent approval.</p>
+                    <div id="myPendingList">
+                        <p style="color:var(--text-secondary);font-size:0.85rem;">No pending requests</p>
+                    </div>
+                </div>
+
+                <!-- Sharing preferences -->
+                <div class="chart-card full-width" id="sharingPrefsCard" style="display:none;">
+                    <h3 style="margin-bottom:12px;">Sharing Preferences</h3>
+                    <p class="tracking-desc" style="font-size:0.82rem;margin-bottom:16px;">Choose what spending data to share with your family.</p>
+
+                    <div style="margin-bottom:16px;">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:8px;">
+                            <input type="checkbox" id="sharingEnabled" style="width:18px;height:18px;accent-color:#10b981;">
+                            <div>
+                                <div style="font-weight:600;font-size:0.88rem;">Enable Spending Sharing</div>
+                                <div class="tracking-desc" style="font-size:0.75rem;">When on, your expenses are visible to your family admin</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="shareOptions" style="display:none;">
+                        <div style="margin-bottom:14px;">
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:6px;">
+                                <input type="radio" name="shareScope" value="all" checked style="accent-color:#10b981;">
+                                <div>
+                                    <div style="font-weight:600;font-size:0.85rem;">Share All Spending</div>
+                                    <div class="tracking-desc" style="font-size:0.72rem;">Every expense you log will be visible</div>
+                                </div>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;background:rgba(255,255,255,0.03);border-radius:10px;">
+                                <input type="radio" name="shareScope" value="selected" style="accent-color:#10b981;">
+                                <div>
+                                    <div style="font-weight:600;font-size:0.85rem;">Share Specific Categories Only</div>
+                                    <div class="tracking-desc" style="font-size:0.72rem;">Pick which categories to share</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="categoryShareList" style="display:none;"></div>
+                        <button class="btn-primary" id="saveSharingBtn" style="margin-top:12px;width:100%;">Save Preferences</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Member Modal -->
+        <div class="modal-overlay hidden" id="memberModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Add Family Member</h2>
+                    <button class="modal-close" id="closeMemberModal">&times;</button>
+                </div>
+                <form id="memberForm">
+                    <div class="field">
+                        <label>Name</label>
+                        <input type="text" id="memberName" required placeholder="e.g. Sarah">
+                    </div>
+                    <div class="field">
+                        <label>Role</label>
+                        <select id="memberRole" required>
+                            <option value="parent">Parent</option>
+                            <option value="teen">Teen (13-17)</option>
+                            <option value="child">Child (under 13)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Age</label>
+                        <input type="number" id="memberAge" min="1" max="99" placeholder="Optional">
+                    </div>
+                    <div class="field">
+                        <label>Avatar Color</label>
+                        <div class="color-picker-row" id="memberColorPicker">
+                            <button type="button" class="color-dot active" data-color="#8b5cf6" style="background:#8b5cf6;"></button>
+                            <button type="button" class="color-dot" data-color="#ef4444" style="background:#ef4444;"></button>
+                            <button type="button" class="color-dot" data-color="#f59e0b" style="background:#f59e0b;"></button>
+                            <button type="button" class="color-dot" data-color="#10b981" style="background:#10b981;"></button>
+                            <button type="button" class="color-dot" data-color="#3b82f6" style="background:#3b82f6;"></button>
+                            <button type="button" class="color-dot" data-color="#ec4899" style="background:#ec4899;"></button>
+                            <button type="button" class="color-dot" data-color="#14b8a6" style="background:#14b8a6;"></button>
+                            <button type="button" class="color-dot" data-color="#f97316" style="background:#f97316;"></button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Weekly Allowance</label>
+                        <input type="number" id="memberAllowance" min="0" step="0.01" placeholder="0.00">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%;">Add Member</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Chore Modal -->
+        <div class="modal-overlay hidden" id="choreModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Add Chore</h2>
+                    <button class="modal-close" id="closeChoreModal">&times;</button>
+                </div>
+                <form id="choreForm">
+                    <div class="field">
+                        <label>Chore Name</label>
+                        <input type="text" id="choreName" required placeholder="e.g. Clean bedroom">
+                    </div>
+                    <div class="field">
+                        <label>Assign To</label>
+                        <select id="choreAssignee" required>
+                            <option value="">Select member...</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Reward Amount</label>
+                        <input type="number" id="choreReward" min="0" step="0.01" required placeholder="5.00">
+                    </div>
+                    <div class="field">
+                        <label>Frequency</label>
+                        <select id="choreFrequency">
+                            <option value="once">One-time</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%;">Add Chore</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Family Goal Modal -->
+        <div class="modal-overlay hidden" id="familyGoalModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>New Family Goal</h2>
+                    <button class="modal-close" id="closeFamilyGoalModal">&times;</button>
+                </div>
+                <form id="familyGoalForm">
+                    <div class="field">
+                        <label>Goal Name</label>
+                        <input type="text" id="familyGoalName" required placeholder="e.g. Family Vacation">
+                    </div>
+                    <div class="field">
+                        <label>Target Amount</label>
+                        <input type="number" id="familyGoalTarget" min="1" step="0.01" required placeholder="5000.00">
+                    </div>
+                    <div class="field">
+                        <label>Target Date</label>
+                        <input type="date" id="familyGoalDeadline">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%;">Create Goal</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Family Setup Modal -->
+        <div class="modal-overlay hidden" id="familySetupModal">
+            <div class="modal">
+                <div class="business-setup-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                </div>
+                <h2 style="text-align:center;">Set Up Family Account</h2>
+                <p style="text-align:center;color:rgba(255,255,255,0.5);margin-bottom:20px;">Track your household budget and manage allowances</p>
+                <form id="familySetupForm">
+                    <div class="field">
+                        <label>Family Name</label>
+                        <input type="text" id="familyName" required placeholder="e.g. The Smiths">
+                    </div>
+                    <div class="field">
+                        <label>Monthly Household Budget</label>
+                        <input type="number" id="familyBudget" min="0" step="0.01" required placeholder="e.g. 15000">
+                    </div>
+                    <div class="field">
+                        <label>Currency</label>
+                        <select id="familyCurrency" required>
+                            <option value="ZAR">ZAR - South African Rand</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="NGN">NGN - Nigerian Naira</option>
+                            <option value="KES">KES - Kenyan Shilling</option>
+                            <option value="GHS">GHS - Ghanaian Cedi</option>
+                            <option value="INR">INR - Indian Rupee</option>
+                            <option value="BRL">BRL - Brazilian Real</option>
+                            <option value="AUD">AUD - Australian Dollar</option>
+                            <option value="CAD">CAD - Canadian Dollar</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width:100%;">Let's Go!</button>
+                    <button type="button" class="biz-cancel-btn" id="familyCancelBtn">Cancel</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- PAGE: Account -->
+        <!-- PAGE: How to Use -->
+        <section class="page" id="page-help">
+            <div class="page-header">
+                <div>
+                    <h1>How to Use BudgetWise</h1>
+                    <p class="page-subtitle">Your guide to every feature</p>
+                </div>
+                <button class="btn-primary" id="replayTourBtn">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                    Replay Tour
+                </button>
+            </div>
+
+            <!-- Shared instructions (all modes) -->
+            <div class="help-section">
+                <div class="help-card">
+                    <div class="help-card-icon">&#128202;</div>
+                    <h3>Overview Dashboard</h3>
+                    <p>Your home page shows a snapshot of your finances: monthly income, total spent, remaining budget, and savings goal progress. The <strong>Budget Ring</strong> gives a visual gauge — green means you're on track, yellow means be careful, red means you're near your limit.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#9889;</div>
+                    <h3>Quick Add</h3>
+                    <p>The bar at the top of Overview lets you log expenses instantly. Pick a category, type the amount, add a short description, and hit <strong>Add</strong>. No need to open the full expense form for quick entries.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128176;</div>
+                    <h3>Expenses</h3>
+                    <p>View all your transactions, filter by month or category, and search by description. On mobile, <strong>swipe left</strong> on a row to delete or <strong>swipe right</strong> to edit. Deleted expenses can be undone within 5 seconds.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#127919;</div>
+                    <h3>Savings Goals</h3>
+                    <p>Set multiple savings goals with target amounts and deadlines. Track your progress visually and get advice on how to reach them faster.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128177;</div>
+                    <h3>Currency Converter</h3>
+                    <p>Convert between 150+ currencies with real-time exchange rates. Great for travel budgeting or if you earn in one currency and spend in another.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128161;</div>
+                    <h3>Smart Advice</h3>
+                    <p>Get personalised tips based on your spending patterns — like which categories you're overspending in and how to adjust your budget.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128269;</div>
+                    <h3>Global Search</h3>
+                    <p>Press <strong>Ctrl+K</strong> (or Cmd+K on Mac) to search across all your expenses, savings goals, and categories in one place.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128260;</div>
+                    <h3>Recurring Detection</h3>
+                    <p>If the same expense appears 3+ months in a row, BudgetWise will suggest marking it as recurring so it auto-populates each month.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#127974;</div>
+                    <h3>Bank Connect</h3>
+                    <p>Link your bank account to automatically import transactions (Beta). Currently supports South African banks.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128424;</div>
+                    <h3>Export to PDF</h3>
+                    <p>Export your expenses list as a clean PDF. Go to <strong>Expenses</strong> and click <strong>Export PDF</strong> — a print-friendly view opens so you can save or print your records.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128247;</div>
+                    <h3>Receipt Scanner</h3>
+                    <p>Snap a photo of any receipt and BudgetWise will read it using OCR. It extracts the total amount, store name, and suggests a category. Tap <strong>Scan</strong> on the Overview page to try it.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128190;</div>
+                    <h3>Backup & Restore</h3>
+                    <p>Download all your data as a JSON file from <strong>Account &gt; Backup All Data</strong>. To restore, use <strong>Restore from Backup</strong> and pick a previously saved file. Great for migrating between devices.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128100;</div>
+                    <h3>Profile Editing</h3>
+                    <p>Update your name, email, or password from the <strong>Account</strong> page. Click <strong>Edit</strong> next to your name or <strong>Change</strong> next to your email. Use <strong>Change Password</strong> under Actions.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128274;</div>
+                    <h3>Budget Limits</h3>
+                    <p>Set spending limits per category from <strong>Expenses &gt; Limits</strong>. When you approach or exceed a limit, you'll get a notification. Limits reset monthly.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#9971;</div>
+                    <h3>Tithe Tracking</h3>
+                    <p>Toggle tithe on from <strong>Account</strong> to automatically calculate 10% of your income. A tithe category appears in your expense dropdown for easy tracking.</p>
+                </div>
+            </div>
+
+            <!-- Business-only instructions -->
+            <div class="help-section help-business-only" style="display:none;">
+                <h2 class="help-section-title">Business Features</h2>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128221;</div>
+                    <h3>Invoices</h3>
+                    <p>Create and manage invoices for your clients. Track which are paid, pending, or overdue. Invoice amounts feed into your Profit & Loss report automatically.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128101;</div>
+                    <h3>Clients</h3>
+                    <p>Keep a directory of your clients with contact details. Link invoices to clients for easy tracking of who owes what.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128200;</div>
+                    <h3>Profit & Loss</h3>
+                    <p>See your revenue vs expenses breakdown. Tracks income from paid invoices against your business expenses to show net profit by category.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128203;</div>
+                    <h3>Tax Estimator</h3>
+                    <p>Estimates your quarterly tax liability based on your revenue and deductible expenses. Shows a breakdown by quarter and your top deductible categories.</p>
+                </div>
+            </div>
+
+            <!-- Family-only instructions -->
+            <div class="help-section help-family-only" style="display:none;">
+                <h2 class="help-section-title">Family Features</h2>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128106;</div>
+                    <h3>Family Members</h3>
+                    <p>Add everyone in your household — parents, teens, and kids. Each member gets their own colour, role, and weekly allowance. Click <strong>Edit</strong> on any member card to update their details.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128181;</div>
+                    <h3>Allowances</h3>
+                    <p>Set weekly spending money for each member. Track how much they've spent and how much is left. Allowances <strong>auto-reset every Monday</strong>. You'll see a warning when someone has used 80%+ of their allowance.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#9989;</div>
+                    <h3>Chores & Rewards</h3>
+                    <p>Assign chores with cash rewards to motivate the family. When a chore is marked complete, the reward gets added to that member's allowance automatically.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#127942;</div>
+                    <h3>Family Goals</h3>
+                    <p>Save together as a family for something special — a holiday, new TV, etc. Each member can contribute, and you'll see who contributed what.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#127775;</div>
+                    <h3>Wish List</h3>
+                    <p>Kids can add items they're saving up for. They can incrementally save toward each wish and see their progress. A celebration shows when they reach the goal!</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#127941;</div>
+                    <h3>Savings Leaderboard</h3>
+                    <p>See which family member has saved the most from their allowance this week. Gold, silver, and bronze medals make saving a friendly competition.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128202;</div>
+                    <h3>Monthly Family Report</h3>
+                    <p>Get a full breakdown of the month: total budget, per-member spending, completed chores, goal progress, and top spending categories. Great for family budget meetings.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128161;</div>
+                    <h3>Financial Tips</h3>
+                    <p>A new money tip appears daily on the Allowances page — age-appropriate advice to teach kids about saving, spending wisely, and earning.</p>
+                </div>
+                <div class="help-card">
+                    <div class="help-card-icon">&#128065;</div>
+                    <h3>Spending Tracker</h3>
+                    <p>Track real spending from family members who also have BudgetWise. As a parent: <strong>generate an invite code</strong> and share it. Members enter the code to link, then you <strong>approve</strong> them. Members choose to <strong>share all spending or specific categories only</strong>. Their expenses appear in your live feed. Members can unlink at any time.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="page" id="page-account">
+            <div class="page-header">
+                <div>
+                    <h1>Account</h1>
+                    <p class="page-subtitle">Your profile and settings</p>
+                </div>
+            </div>
+
+            <div class="account-profile-clean">
+                <h2 class="account-name-top" id="accountName">-</h2>
+                <div class="account-avatar-wrap">
+                    <div class="account-avatar" id="accountAvatar" role="button" tabindex="0"></div>
+                    <label class="avatar-upload" for="avatarInput">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    </label>
+                    <input type="file" id="avatarInput" accept="image/*" hidden>
+                </div>
+            </div>
+
+            <!-- Avatar Preview Overlay -->
+            <div class="avatar-preview-overlay hidden" id="avatarPreviewOverlay">
+                <div class="avatar-preview-img" id="avatarPreviewImg"></div>
+            </div>
+
+            <!-- Subscription Card -->
+            <div class="pro-card" id="proCard">
+                <div class="pro-card-inner">
+                    <div class="pro-card-left">
+                        <div class="pro-plan-badge" id="proPlanBadge">FREE</div>
+                        <div class="pro-card-text">
+                            <h3 id="proCardTitle">Upgrade to Pro</h3>
+                            <p id="proCardDesc">Unlock bank sync, Business &amp; Family modes, push alerts, and priority support.</p>
+                        </div>
+                    </div>
+                    <button class="btn-upgrade" id="upgradeBtn">Upgrade Now</button>
+                </div>
+            </div>
+
+            <div class="account-grid">
+                <div class="chart-card full-width">
+                    <h3>Account Details</h3>
+                    <div class="account-details">
+                        <div class="account-row">
+                            <span class="account-label">Full Name</span>
+                            <span class="account-value">
+                                <span id="accName">-</span>
+                                <button class="btn-change-inline" id="changeNameBtn">Edit</button>
+                            </span>
+                        </div>
+                        <div class="account-row">
+                            <span class="account-label">Email</span>
+                            <span class="account-value">
+                                <span id="accEmail">-</span>
+                                <button class="btn-change-inline" id="changeEmailBtn">Change</button>
+                            </span>
+                        </div>
+                        <div class="account-row">
+                            <span class="account-label">Sign-in Method</span>
+                            <span class="account-value" id="accProvider">-</span>
+                        </div>
+                        <div class="account-row">
+                            <span class="account-label">Member Since</span>
+                            <span class="account-value" id="accJoined">-</span>
+                        </div>
+                        <div class="account-row">
+                            <span class="account-label">Currency</span>
+                            <span class="account-value">
+                                <span id="accCurrency">-</span>
+                                <button class="btn-change-inline" id="changeCurrencyBtn">Change</button>
+                            </span>
+                        </div>
+                        <div class="account-row" id="accModeNameRow" style="display:none;">
+                            <span class="account-label" id="accModeNameLabel">Account Name</span>
+                            <span class="account-value">
+                                <span id="accModeName">-</span>
+                                <button class="btn-change-inline" id="changeModeName">Edit</button>
+                            </span>
+                        </div>
+                        <div class="account-row" id="accBizTypeRow" style="display:none;">
+                            <span class="account-label">Business Type</span>
+                            <span class="account-value" id="accBizType">-</span>
+                        </div>
+                        <div class="account-row">
+                            <span class="account-label" id="accIncomeLabel">Monthly Income</span>
+                            <span class="account-value" id="accIncome">-</span>
+                        </div>
+                        <div class="account-row">
+                            <span class="account-label" id="accGoalLabel">Savings Goal</span>
+                            <span class="account-value" id="accGoal">-</span>
+                        </div>
+                        <div class="account-row" id="titheRow">
+                            <span class="account-label">Tithe (10%)</span>
+                            <span class="account-value tithe-value">
+                                <span id="titheAmount">-</span>
+                                <label class="tithe-toggle">
+                                    <input type="checkbox" id="titheToggle">
+                                    <span class="tithe-slider"></span>
+                                </label>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card full-width">
+                    <h3>Quick Stats</h3>
+                    <div class="account-details">
+                        <div class="account-row">
+                            <span class="account-label">Total Expenses Logged</span>
+                            <span class="account-value" id="accTotalExpenses">-</span>
+                        </div>
+                        <div class="account-row">
+                            <span class="account-label">Categories Used</span>
+                            <span class="account-value" id="accCategories">-</span>
+                        </div>
+                        <div class="account-row">
+                            <span class="account-label">Savings Goals</span>
+                            <span class="account-value" id="accGoalsCount">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card full-width">
+                    <h3>Achievements</h3>
+                    <div class="achievements-grid" id="achievementsGrid"></div>
+                </div>
+
+                <div class="chart-card full-width">
+                    <h3>Actions</h3>
+                    <div class="account-actions">
+                        <button class="btn-primary" id="accChangePassword">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            Change Password
+                        </button>
+                        <button class="btn-primary" id="accBackup">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m4-5l5 5 5-5m-5 5V3"/></svg>
+                            Backup All Data
+                        </button>
+                        <button class="btn-primary" id="accRestore">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m14-7l-5-5-5 5m5-5v12"/></svg>
+                            Restore from Backup
+                        </button>
+                        <input type="file" id="restoreFile" accept=".json" hidden>
+                        <button class="btn-primary" id="accLogout">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4m7 14l5-5-5-5m5 5H9"/></svg>
+                            Sign Out
+                        </button>
+                        <button class="btn-danger" id="accDeleteData">Delete All My Data</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upgrade Modal -->
+        <div class="modal-overlay hidden" id="upgradeModal">
+            <div class="modal upgrade-modal">
+                <div class="modal-header">
+                    <h2>Choose Your Plan</h2>
+                    <button class="modal-close" id="closeUpgradeModal">&times;</button>
+                </div>
+                <div class="upgrade-scroll-wrap">
+                <div class="upgrade-plans">
+                    <div class="plan-card plan-free">
+                        <div class="plan-name">Free</div>
+                        <div class="plan-price">R0<span>/forever</span></div>
+                        <ul class="plan-features">
+                            <li class="included">Expense tracking &amp; charts</li>
+                            <li class="included">Budget ring &amp; smart advice</li>
+                            <li class="included">Savings goals (up to 3)</li>
+                            <li class="included">Currency converter (150+)</li>
+                            <li class="included">CSV export</li>
+                            <li class="excluded">Bank sync (auto-import)</li>
+                            <li class="excluded">Business &amp; Family modes</li>
+                            <li class="excluded">PDF export &amp; receipt scanner</li>
+                            <li class="excluded">Push alerts &amp; notifications</li>
+                            <li class="excluded">Unlimited savings goals</li>
+                        </ul>
+                        <button class="btn-plan" disabled>Current Plan</button>
+                    </div>
+                    <div class="plan-card plan-pro popular">
+                        <div class="plan-popular-tag">Most Popular</div>
+                        <div class="plan-name">Pro Monthly</div>
+                        <div class="plan-price">R79<span>/month</span></div>
+                        <ul class="plan-features">
+                            <li class="included">Everything in Free</li>
+                            <li class="included">Bank sync (auto-import)</li>
+                            <li class="included">Business &amp; Family modes</li>
+                            <li class="included">PDF export &amp; receipt scanner</li>
+                            <li class="included">Push alerts &amp; notifications</li>
+                            <li class="included">Unlimited savings goals</li>
+                            <li class="included">Data backup &amp; restore</li>
+                            <li class="included">Priority support</li>
+                        </ul>
+                        <button class="btn-plan btn-plan-pro" data-plan="pro_monthly">Get Pro Monthly</button>
+                    </div>
+                    <div class="plan-card plan-yearly">
+                        <div class="plan-save-tag">Save 30%</div>
+                        <div class="plan-name">Pro Yearly</div>
+                        <div class="plan-price">R659<span>/year</span></div>
+                        <div class="plan-per-month">~R55/month</div>
+                        <ul class="plan-features">
+                            <li class="included">Everything in Pro</li>
+                            <li class="included">2 months free</li>
+                            <li class="included">Early access to new features</li>
+                        </ul>
+                        <button class="btn-plan btn-plan-yearly" data-plan="pro_yearly">Get Pro Yearly</button>
+                    </div>
+                </div>
+                <div class="trial-banner">
+                    <span class="trial-icon">🎉</span>
+                    <div class="trial-text">
+                        <strong>Try Pro free for 1 month!</strong>
+                        <span>No credit card required. Cancel anytime.</span>
+                    </div>
+                    <button class="btn-trial" id="startTrialBtn">Start Free Trial</button>
+                </div>
+                <p class="upgrade-note">Secure payment powered by Stripe. Cancel anytime.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Change Currency Modal -->
+        <div class="modal-overlay hidden" id="changeCurrencyModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Change Currency</h2>
+                    <button class="modal-close" id="closeChangeCurrencyModal">&times;</button>
+                </div>
+                <form id="changeCurrencyForm">
+                    <div class="field">
+                        <label>Currency</label>
+                        <select id="newCurrencySelect" required>
+                            <option value="ZAR">ZAR - South African Rand</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="NGN">NGN - Nigerian Naira</option>
+                            <option value="KES">KES - Kenyan Shilling</option>
+                            <option value="GHS">GHS - Ghanaian Cedi</option>
+                            <option value="INR">INR - Indian Rupee</option>
+                            <option value="BRL">BRL - Brazilian Real</option>
+                            <option value="JPY">JPY - Japanese Yen</option>
+                            <option value="AUD">AUD - Australian Dollar</option>
+                            <option value="CAD">CAD - Canadian Dollar</option>
+                            <option value="CNY">CNY - Chinese Yuan</option>
+                            <option value="BWP">BWP - Botswana Pula</option>
+                            <option value="MZN">MZN - Mozambican Metical</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Save Currency</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Budget Limits Modal -->
+        <div class="modal-overlay hidden" id="budgetLimitsModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>Category Budget Limits</h2>
+                    <button class="modal-close" id="closeBudgetLimitsModal">&times;</button>
+                </div>
+                <p class="modal-desc">Set spending caps per category. You'll see a warning when you're close.</p>
+                <div id="budgetLimitsList"></div>
+            </div>
+        </div>
+
+        <!-- Floating Action Button (mobile) -->
+        <button class="fab" id="fabAdd">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14m-7-7h14"/></svg>
+        </button>
+    </main>
+
+    <!-- Global Search Overlay -->
+    <div class="global-search-overlay hidden" id="globalSearchOverlay">
+        <div class="global-search-box">
+            <input type="text" class="global-search-input" id="globalSearchInput" placeholder="Search expenses, goals, categories..." autocomplete="off">
+            <div class="global-search-results" id="globalSearchResults"></div>
+        </div>
+    </div>
+
+    <!-- Edit Member Modal -->
+    <div class="modal-overlay hidden" id="editMemberModal">
+        <div class="modal edit-member-modal">
+            <div class="modal-header">
+                <h2>Edit Member</h2>
+                <button class="modal-close" id="closeEditMemberModal">&times;</button>
+            </div>
+            <form id="editMemberForm">
+                <input type="hidden" id="editMemberId">
+                <div class="field">
+                    <label>Name</label>
+                    <input type="text" id="editMemberName" required>
+                </div>
+                <div class="field">
+                    <label>Role</label>
+                    <select id="editMemberRole">
+                        <option value="parent">Parent</option>
+                        <option value="child">Child</option>
+                        <option value="teen">Teen</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Age</label>
+                    <input type="number" id="editMemberAge" min="1" max="99">
+                </div>
+                <div class="field">
+                    <label>Weekly Allowance</label>
+                    <input type="number" id="editMemberAllowance" min="0" step="0.01">
+                </div>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Wish List Modal -->
+    <div class="modal-overlay hidden" id="wishListModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Wish List</h2>
+                <button class="modal-close" id="closeWishListModal">&times;</button>
+            </div>
+            <div id="wishListItems"></div>
+            <form id="addWishForm" style="margin-top:16px;display:flex;gap:8px;">
+                <input type="text" id="wishName" placeholder="Item name" required style="flex:2" class="quick-input">
+                <input type="number" id="wishCost" placeholder="Cost" min="0" step="0.01" required style="flex:1" class="quick-input">
+                <button type="submit" class="btn-primary" style="padding:10px 16px;">Add</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Family Report Modal -->
+    <div class="modal-overlay hidden" id="familyReportModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Monthly Family Report</h2>
+                <button class="modal-close" id="closeFamilyReportModal">&times;</button>
+            </div>
+            <div class="family-report" id="familyReportContent"></div>
+        </div>
+    </div>
+
+    <!-- Move to Account Modal -->
+    <div class="modal-overlay hidden" id="moveAccountModal">
+        <div class="modal" style="max-width:380px;">
+            <div class="modal-header">
+                <h2>Move to Account</h2>
+                <button class="modal-close" id="closeMoveAccountModal">&times;</button>
+            </div>
+            <p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:16px;">Move this expense to a different account mode.</p>
+            <div id="moveExpenseInfo" style="padding:12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:16px;font-size:0.85rem;"></div>
+            <div style="display:flex;flex-direction:column;gap:8px;" id="moveAccountOptions">
+                <button class="btn-primary move-option" data-mode="personal" style="padding:12px;display:flex;align-items:center;gap:10px;background:rgba(16,185,129,0.08);color:#10b981;justify-content:center;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Personal
+                </button>
+                <button class="btn-primary move-option" data-mode="business" style="padding:12px;display:flex;align-items:center;gap:10px;background:rgba(59,130,246,0.08);color:#3b82f6;justify-content:center;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 8h1m4 0h1M9 12h1m4 0h1M9 16h1m4 0h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/></svg>
+                    Business
+                </button>
+                <button class="btn-primary move-option" data-mode="family" style="padding:12px;display:flex;align-items:center;gap:10px;background:rgba(139,92,246,0.08);color:#8b5cf6;justify-content:center;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                    Family
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plaid Transaction Routing Modal (Phase 3) -->
+    <div class="modal-overlay hidden" id="txRoutingModal" style="z-index:10001;">
+        <div class="modal" style="max-width:400px;">
+            <div class="modal-header">
+                <h2>New Transaction Detected</h2>
+            </div>
+            <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:12px;">Money was received in your bank account. Which BudgetWise account should it go to?</p>
+            <div id="txRoutingInfo" style="padding:14px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:10px;margin-bottom:16px;">
+                <div style="font-weight:700;font-size:1.1rem;" id="txRoutingAmount"></div>
+                <div style="font-size:0.8rem;color:var(--text-secondary);" id="txRoutingDesc"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;" id="txRoutingOptions">
+                <button class="btn-primary tx-route-option" data-mode="personal" style="padding:14px;display:flex;align-items:center;gap:10px;background:rgba(16,185,129,0.1);color:#10b981;font-weight:600;border-radius:12px;justify-content:center;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Personal Account
+                </button>
+                <button class="btn-primary tx-route-option" data-mode="business" style="padding:14px;display:flex;align-items:center;gap:10px;background:rgba(59,130,246,0.1);color:#3b82f6;font-weight:600;border-radius:12px;justify-content:center;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M9 8h1m4 0h1M9 12h1m4 0h1M9 16h1m4 0h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/></svg>
+                    Business Account
+                </button>
+                <button class="btn-primary tx-route-option" data-mode="family" style="padding:14px;display:flex;align-items:center;gap:10px;background:rgba(139,92,246,0.1);color:#8b5cf6;font-weight:600;border-radius:12px;justify-content:center;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/></svg>
+                    Family Account
+                </button>
+            </div>
+            <button class="btn-primary" id="txRoutingSkip" style="margin-top:10px;width:100%;padding:10px;background:rgba(255,255,255,0.04);color:var(--text-secondary);font-size:0.82rem;">Skip (Don't add to any account)</button>
+        </div>
+    </div>
+
+    <!-- Move Money Modal -->
+    <div class="modal-overlay hidden" id="moveMoneyModal">
+        <div class="modal" style="max-width:400px;">
+            <div class="modal-header">
+                <h2>Transfer Money</h2>
+                <button class="modal-close" id="closeMoveMoneyModal">&times;</button>
+            </div>
+            <p style="color:var(--text-secondary);font-size:0.82rem;margin-bottom:16px;">Move funds between your accounts. This adjusts income on both sides.</p>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <div>
+                    <label style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:4px;display:block;">From</label>
+                    <select id="moveMoneyFrom" style="width:100%;padding:10px 12px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-size:0.9rem;">
+                        <option value="personal">Personal</option>
+                        <option value="business">Business</option>
+                        <option value="family">Family</option>
+                    </select>
+                </div>
+                <div style="text-align:center;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--text-secondary)" stroke-width="2" style="opacity:0.5;"><path d="M12 5v14m0 0l-4-4m4 4l4-4"/></svg>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:4px;display:block;">To</label>
+                    <select id="moveMoneyTo" style="width:100%;padding:10px 12px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-size:0.9rem;">
+                        <option value="personal">Personal</option>
+                        <option value="business">Business</option>
+                        <option value="family">Family</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:4px;display:block;">Amount</label>
+                    <input type="number" id="moveMoneyAmount" placeholder="0.00" min="0" step="0.01" style="width:100%;padding:10px 12px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-size:1rem;font-weight:600;box-sizing:border-box;">
+                </div>
+                <div id="moveMoneyPreview" style="padding:10px;background:rgba(255,255,255,0.03);border-radius:10px;font-size:0.8rem;color:var(--text-secondary);display:none;"></div>
+                <button class="btn-primary" id="moveMoneyConfirm" style="padding:12px;font-weight:600;margin-top:4px;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:6px;"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                    Transfer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay hidden" id="changePasswordModal">
+        <div class="modal" style="max-width:380px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <h2 style="margin:0;font-size:1.1rem;">Change Password</h2>
+                <button id="closePasswordModal" style="background:none;border:none;color:var(--text-secondary);font-size:1.5rem;cursor:pointer;padding:0 4px;">&times;</button>
+            </div>
+            <form id="changePasswordForm">
+                <div class="field">
+                    <label>New Password</label>
+                    <input type="password" id="newPasswordInput" required minlength="6" placeholder="Minimum 6 characters" autocomplete="new-password">
+                </div>
+                <div class="field">
+                    <label>Confirm Password</label>
+                    <input type="password" id="confirmPasswordInput" required minlength="6" placeholder="Re-enter password" autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">Update Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Undo Toast -->
+    <div class="undo-toast hidden" id="undoToast">
+        <span class="undo-message">Action completed</span>
+        <button class="undo-btn">Undo</button>
+    </div>
+
+    <!-- Mobile Install Banner -->
+    <div class="mobile-install-banner hidden" id="mobileInstallBanner">
+        <div class="install-banner-text">
+            <strong>Install BudgetWise</strong>
+            <span>Add to home screen for a better experience</span>
+        </div>
+        <button class="install-banner-btn" id="installBannerBtn">Install</button>
+        <button class="install-banner-dismiss" id="installBannerDismiss">&times;</button>
+    </div>
+
+    <!-- Onboarding Tour -->
+    <div class="tour-overlay hidden" id="tourOverlay"></div>
+    <div class="tour-spotlight hidden" id="tourSpotlight"></div>
+    <div class="tour-tooltip hidden" id="tourTooltip">
+        <h3 id="tourTitle"></h3>
+        <p id="tourDesc"></p>
+        <div class="tour-actions">
+            <button class="tour-skip" id="tourSkip">Skip tour</button>
+            <div class="tour-dots" id="tourDots"></div>
+            <button class="tour-next" id="tourNext">Next</button>
+        </div>
+    </div>
+
+    <!-- Receipt scan input & modal -->
+    <input type="file" id="receiptInput" accept="image/*" capture="environment" hidden>
+    <div class="modal-overlay hidden" id="scanResultModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Scanned Receipt</h2>
+                <button class="modal-close" id="closeScanModal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:20px;">
+                <p style="color:rgba(255,255,255,0.5);font-size:0.82rem;margin-bottom:16px;">Review and edit the extracted details before adding.</p>
+                <div id="scanPreview" style="max-height:200px;overflow:auto;margin-bottom:16px;border-radius:8px;"></div>
+                <div style="display:flex;flex-direction:column;gap:12px;">
+                    <div><label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Amount</label><input type="number" id="scanAmount" step="0.01" class="input" style="width:100%;"></div>
+                    <div><label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Description</label><input type="text" id="scanDescription" class="input" style="width:100%;"></div>
+                    <div><label style="font-size:0.78rem;color:rgba(255,255,255,0.5);display:block;margin-bottom:4px;">Category</label><select id="scanCategory" class="input" style="width:100%;"></select></div>
+                    <button class="btn-primary" id="scanAddExpense" style="margin-top:8px;">Add Expense</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confetti canvas -->
+    <canvas id="confettiCanvas" style="position:fixed;inset:0;z-index:999;pointer-events:none;"></canvas>
+    <script type="module" src="js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+</body>
+</html>

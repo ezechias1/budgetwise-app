@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="bar1" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.6)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.9)"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="192" height="192" rx="42" fill="url(#bg)"/>
+  <!-- Wallet/shield shape -->
+  <path d="M96 30C72 30 38 42 38 42v72c0 30 26 46 58 58 32-12 58-28 58-58V42S130 30 96 30z" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+  <!-- Rising bar chart -->
+  <rect x="56" y="108" width="16" height="28" rx="3" fill="url(#bar1)"/>
+  <rect x="78" y="90" width="16" height="46" rx="3" fill="url(#bar1)"/>
+  <rect x="100" y="72" width="16" height="64" rx="3" fill="url(#bar1)"/>
+  <rect x="122" y="54" width="16" height="82" rx="3" fill="url(#bar1)"/>
+  <!-- Upward arrow -->
+  <path d="M60 98 L134 48" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <path d="M124 44 L138 46 L132 58" fill="white" opacity="0.95"/>
+</svg>

@@ -1,0 +1,19 @@
+.vercel
+node_modules/
+www/
+android/
+ios/
+
+# Business docs (keep private)
+BudgetWise_Business_Plan.txt
+store-listing.txt
+social-media-posts.txt
+
+# Environment
+.env
+.env.local
+.env.production
+
+# OS files
+.DS_Store
+Thumbs.db
