@@ -2,6 +2,10 @@
 
 A Progressive Web App for personal and business budgeting. Track expenses, set savings goals, and visualize your spending with interactive charts.
 
+**[Live Demo](https://budget-wise-ruby.vercel.app)**
+
+![BudgetWise Dashboard](screenshot.png)
+
 ## Features
 
 - Personal, business, and family account modes
@@ -34,6 +38,6 @@ A Progressive Web App for personal and business budgeting. Track expenses, set s
 npx serve .
 ```
 
-## Screenshots
+## Author
 
-Coming soon.
+**Ezechias Mulamba** — [GitHub](https://github.com/ezechias1)
